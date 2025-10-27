@@ -23,6 +23,7 @@ async function sendVerificationEmail(user) {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
+
     const verificationLink = `${process.env.SERVER_URL}/api/auth/verify-email?token=${token}`;
 
     const html = await ejs.renderFile(

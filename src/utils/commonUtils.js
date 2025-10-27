@@ -18,17 +18,22 @@ module.exports = {
   },
 
   // Generate JWT Token
-async  generateJWT(user) {
-  const payload = {
-    _id: user._id,
-    email: user.email,
-  };
+  async generateJWT(user) {
+    const payload = {
+      _id: user._id,
+      email: user.email,
+    };
 
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
-},
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+  },
 
-// Verify JWT Token
-async verifyJWT(token) {
-  return jwt.verify(token, process.env.JWT_SECRET);
-}
+  // Verify JWT Token
+  async verifyJWT(token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Synchronously resolve the token
+      return decoded; // Return the decoded payload
+    } catch (err) {
+      throw new Error("Invalid or expired token.");
+    }
+  },
 };

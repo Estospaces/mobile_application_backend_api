@@ -57,16 +57,19 @@ async function createUser(userData) {
 
 async function activateUserById(userId) {
   try {
-    const { error } = await supabase
+    const { data,error } = await supabase
       .from("users")
       .update({
         active_user: true,
         email_verified: true,
         updated_at: new Date().toISOString(),
       })
-      .eq("_id", userId);
+      .eq("_id", userId)
+      .select("_id, email, full_name, email_verified, active_user");
 
     if (error) throw new Error(error.message);
+
+    return data?.[0] || null;
   } catch (error) {
     throw error;
   }

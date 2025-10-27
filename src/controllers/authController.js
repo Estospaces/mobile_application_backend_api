@@ -59,11 +59,21 @@ async function verifyEmail(req, res) {
     if (!token) {
       return res.status(400).json({ message: "Missing verification token." });
     }
-    const decoded = utils.verifyJWT(token);
+    const decoded = await utils.verifyJWT(token);
 
-    await userService.activateUserById(decoded.userId);
+    if (!decoded || !decoded.userId) {
+      return res.status(400).json({ message: "Invalid token payload." });
+    }
 
-    return res.status(200).json({ message: "SUCCESS", token });
+    const user = await userService.activateUserById(decoded.userId);
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8081";
+
+    return res.redirect(
+      `${frontendUrl}/login?verified=true&email=${encodeURIComponent(
+        user.email
+      )}`
+    );
   } catch (error) {
     return res.status(400).json({
       message: "Verification failed or link expired.",
@@ -97,7 +107,7 @@ async function login(req, res) {
       });
     }
 
-    const token = utils.generateJWT({
+    const token = await utils.generateJWT({
       _id: user._id,
       email: user.email,
     });
